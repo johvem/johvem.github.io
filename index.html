@@ -1,41 +1,638 @@
-<html>
+<!DOCTYPE html>
+<html lang="no">
 <head>
-	<title>Linking</title>
-	<link rel="stylesheet" type="text/css" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bokanmeldelser</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #FBF3E2;
+    --paper-dark: #F1E4C9;
+    --ink: #2B2620;
+    --ink-soft: #6B6153;
+    --forest: #1F5B4A;
+    --forest-deep: #163F33;
+    --gold: #D9A441;
+    --gold-deep: #B98328;
+    --berry: #B4443C;
+    --star-off: #E4D9C2;
+    --radius: 18px;
+  }
 
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    background: transparent;
+    font-family: 'Quicksand', sans-serif;
+    color: var(--ink);
+  }
+
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 32px 16px 60px;
+  }
+
+  .book {
+    width: 100%;
+    max-width: 460px;
+    background: var(--paper);
+    border-radius: var(--radius);
+    box-shadow: 0 2px 0 var(--paper-dark), 0 18px 40px rgba(22,63,51,0.28);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(43,38,32,0.06);
+  }
+
+  .book::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 10px;
+    background: linear-gradient(90deg, rgba(43,38,32,0.14), transparent);
+  }
+
+  .book-inner {
+    padding: 30px 28px 26px;
+  }
+
+  /* header */
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+
+  .brand svg { flex-shrink: 0; }
+
+  .brand-text h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 22px;
+    margin: 0;
+    color: var(--forest-deep);
+    line-height: 1.1;
+  }
+
+  .brand-text p {
+    margin: 3px 0 0;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  /* progress dots */
+  .progress {
+    display: flex;
+    gap: 7px;
+    margin-bottom: 24px;
+  }
+  .progress .dot {
+    height: 6px;
+    flex: 1;
+    border-radius: 4px;
+    background: var(--star-off);
+    transition: background 0.35s ease;
+  }
+  .progress .dot.done { background: var(--gold); }
+  .progress .dot.active { background: var(--forest); }
+
+  .pagelabel {
+    font-size: 12px;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+    margin-bottom: 6px;
+  }
+
+  /* steps */
+  .step {
+    display: none;
+    animation: pageIn 0.45s cubic-bezier(.2,.7,.3,1);
+  }
+  .step.active { display: block; }
+
+  @keyframes pageIn {
+    from { opacity: 0; transform: translateX(18px) rotateY(4deg); }
+    to { opacity: 1; transform: translateX(0) rotateY(0); }
+  }
+
+  .question {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 21px;
+    color: var(--forest-deep);
+    margin: 0 0 18px;
+    line-height: 1.3;
+  }
+
+  input[type="text"], textarea {
+    width: 100%;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    background: #fff;
+    border: 2px solid var(--paper-dark);
+    border-radius: 12px;
+    padding: 14px 15px;
+    outline: none;
+    transition: border-color 0.2s ease;
+  }
+  input[type="text"]:focus, textarea:focus {
+    border-color: var(--forest);
+  }
+  textarea {
+    resize: vertical;
+    min-height: 130px;
+    line-height: 1.5;
+    font-weight: 500;
+  }
+
+  .hint {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  /* stars */
+  .stars {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 30px 0 10px;
+  }
+  .stars button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 0;
+    transform: scale(1);
+    transition: transform 0.15s ease;
+  }
+  .stars button:hover { transform: scale(1.12); }
+  .stars svg polygon { transition: fill 0.15s ease; }
+
+  .star-caption {
+    text-align: center;
+    font-weight: 700;
+    color: var(--gold-deep);
+    min-height: 20px;
+    font-size: 15px;
+  }
+
+  /* adjectives */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-top: 4px;
+  }
+  .chip {
+    border: 2px solid var(--paper-dark);
+    background: #fff;
+    color: var(--ink);
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 700;
+    font-size: 14.5px;
+    padding: 9px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .chip.selected {
+    background: var(--forest);
+    border-color: var(--forest);
+    color: #fff;
+  }
+  .chip.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .chip-count {
+    margin-top: 14px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--forest-deep);
+  }
+
+  /* nav buttons */
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 28px;
+    gap: 10px;
+  }
+
+  .btn {
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 12px 22px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn-primary {
+    background: var(--forest);
+    color: #fff;
+    box-shadow: 0 4px 0 var(--forest-deep);
+  }
+  .btn-primary:disabled {
+    background: var(--star-off);
+    color: var(--ink-soft);
+    box-shadow: 0 4px 0 #d9cdae;
+    cursor: not-allowed;
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink-soft);
+    padding: 12px 8px;
+  }
+  .btn-ghost:hover { color: var(--ink); }
+
+  /* start + done screens */
+  .center-icon {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 6px;
+  }
+  .intro, .done {
+    text-align: center;
+  }
+  .intro p, .done p {
+    color: var(--ink-soft);
+    font-size: 14.5px;
+    line-height: 1.5;
+    margin: 10px 0 26px;
+  }
+
+  .summary-card {
+    background: #fff;
+    border: 2px solid var(--paper-dark);
+    border-radius: 14px;
+    padding: 18px 18px 16px;
+    text-align: left;
+    margin-bottom: 22px;
+  }
+  .summary-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--forest-deep);
+    margin: 0 0 8px;
+  }
+  .summary-stars { margin-bottom: 8px; }
+  .summary-adj {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .summary-adj span {
+    background: var(--paper);
+    border-radius: 999px;
+    padding: 4px 11px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--forest-deep);
+  }
+  .summary-text {
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+
+  /* bookshelf */
+  .shelf-toggle {
+    display: block;
+    text-align: center;
+    margin-top: 4px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--forest);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .shelf-list {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+  .shelf-item {
+    background: #fff;
+    border: 2px solid var(--paper-dark);
+    border-radius: 12px;
+    padding: 12px 14px;
+  }
+  .shelf-item-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .shelf-item-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--forest-deep);
+  }
+  .shelf-item-stars { font-size: 12px; color: var(--gold-deep); white-space: nowrap; }
+  .shelf-item-adj {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .shelf-empty {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 13.5px;
+    padding: 20px 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .step { animation: none; }
+  }
+</style>
 </head>
-
 <body>
 
-<header>
-	<h1>Hovedside</h1>
-</header>
+<div class="book">
+  <div class="book-inner">
 
-<nav>
-		<ul>
-		<h3>Meny</h3>
+    <div class="brand">
+      <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+        <path d="M4 6.5C4 5.4 4.9 4.5 6 4.5H15.5V27.5H6C4.9 27.5 4 26.6 4 25.5V6.5Z" fill="#D9A441"/>
+        <path d="M30 6.5C30 5.4 29.1 4.5 28 4.5H18.5V27.5H28C29.1 27.5 30 26.6 30 25.5V6.5Z" fill="#1F5B4A"/>
+        <path d="M15.5 4.5H18.5V27.5H15.5V4.5Z" fill="#B98328"/>
+      </svg>
+      <div class="brand-text">
+        <h1>Utdragsanmeldelser</h1>
+        <p>Fortell hva du synes om utdraget</p>
+      </div>
+    </div>
 
-		<li>
-			<a href="index.html"> Gå til hovedsiden </a>
-		</li>
+    <div class="progress" id="progress">
+      <div class="dot" data-step="1"></div>
+      <div class="dot" data-step="2"></div>
+      <div class="dot" data-step="3"></div>
+      <div class="dot" data-step="4"></div>
+    </div>
 
+    <!-- START -->
+    <div class="step active" id="step-start">
+      <div class="intro">
+        <h1 class="question" style="text-align:center;">Klar for å anmelde et utdrag?</h1>
+        <p>Du skal svare på noen spørsmål om utdraget du nettopp har lest. Det tar bare noen minutter.</p>
+        <button class="btn btn-primary" style="width:100%;" onclick="goStep(1)">Start anmeldelsen</button>
+      </div>
+    </div>
 
-		<li>
-			<a href="side2.html"> Gå til side 2 </a>
-		</li>
+    <!-- STEP 1: TITLE -->
+    <div class="step" id="step-1">
+      <div class="pagelabel">Side 1 av 4</div>
+      <p class="question">Hva har du lest?</p>
+      <input type="text" id="input-title" placeholder="Skriv tittelen på utdraget">
+      <p class="hint">Skriv navnet på utdraget du nettopp har lest ferdig.</p>
+      <div class="nav">
+        <button class="btn btn-ghost" onclick="goStep(0)">Tilbake</button>
+        <button class="btn btn-primary" id="btn-1" disabled onclick="goStep(2)">Neste</button>
+      </div>
+    </div>
 
+    <!-- STEP 2: STARS -->
+    <div class="step" id="step-2">
+      <div class="pagelabel">Side 2 av 4</div>
+      <p class="question">Hvor mange stjerner vil du gi utdraget?</p>
+      <div class="stars" id="stars"></div>
+      <div class="star-caption" id="star-caption"></div>
+      <div class="nav">
+        <button class="btn btn-ghost" onclick="goStep(1)">Tilbake</button>
+        <button class="btn btn-primary" id="btn-2" disabled onclick="goStep(3)">Neste</button>
+      </div>
+    </div>
 
-		<li>
-			<a href="side3.html"> Gå til side 3 </a>
-		</li>
-	</ul>
-</nav>
+    <!-- STEP 3: ADJECTIVES -->
+    <div class="step" id="step-3">
+      <div class="pagelabel">Side 3 av 4</div>
+      <p class="question">Velg 3 ord som passer til utdraget</p>
+      <div class="chips" id="chips"></div>
+      <div class="chip-count" id="chip-count">Du har valgt 0 av 3</div>
+      <div class="nav">
+        <button class="btn btn-ghost" onclick="goStep(2)">Tilbake</button>
+        <button class="btn btn-primary" id="btn-3" disabled onclick="goStep(4)">Neste</button>
+      </div>
+    </div>
 
-<section>
-	<img src="https://static.posters.cz/image/1300/plakater/snowboard-flip-i96988.jpg" width='200'>
+    <!-- STEP 4: TEXT -->
+    <div class="step" id="step-4">
+      <div class="pagelabel">Side 4 av 4</div>
+      <p class="question">Fortell om hva du synes om å lese utdraget.</p>
+      <textarea id="input-text" placeholder="Skriv så mye du vil her..."></textarea>
+      <p class="hint">Skriv gjerne om det du likte best, eller det du husker best.</p>
+      <div class="nav">
+        <button class="btn btn-ghost" onclick="goStep(3)">Tilbake</button>
+        <button class="btn btn-primary" id="btn-4" disabled onclick="submitReview()">Send inn anmeldelsen</button>
+      </div>
+    </div>
 
+    <!-- DONE -->
+    <div class="step" id="step-done">
+      <div class="center-icon">
+        <svg width="46" height="46" viewBox="0 0 46 46" fill="none">
+          <circle cx="23" cy="23" r="23" fill="#1F5B4A"/>
+          <path d="M14 23.5L20 29.5L32 16.5" stroke="#FBF3E2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="done">
+        <h1 class="question" style="text-align:center;">Tusen takk for anmeldelsen!</h1>
+        <p>Her er det du sendte inn:</p>
+        <div class="summary-card" id="summary-card"></div>
+        <button class="btn btn-primary" style="width:100%;" onclick="sendEmail()">Send anmeldelsen på e-post</button>
+        <button class="btn btn-primary" style="width:100%; margin-top:10px; background:var(--gold); box-shadow:0 4px 0 var(--gold-deep);" onclick="resetForm()">Skriv en ny anmeldelse</button>
+      </div>
+    </div>
 
-</section>
+  </div>
+</div>
+
+<script>
+const ADJECTIVES = [
+  "Spennende","Eventyrlig","Morsom","Fantasifull","Rørende","Underholdende",
+  "Mystisk","Lærerik","Engasjerende","Dramatisk","Fargerik","Inspirerende",
+  "Humoristisk","Romantisk","Kjedelig","Skummel","Lett","Tullete","Vanskelig"
+];
+
+let state = { title: "", rating: 0, adjectives: [], text: "" };
+let currentStep = 0;
+let lastRecord = null;
+
+// ---- build stars ----
+const starsEl = document.getElementById('stars');
+function starSvg(filled){
+  return `<svg width="34" height="34" viewBox="0 0 24 24">
+    <polygon points="12,2 14.9,8.6 22,9.3 16.7,14 18.2,21 12,17.3 5.8,21 7.3,14 2,9.3 9.1,8.6"
+      fill="${filled ? 'var(--gold)' : 'var(--star-off)'}" />
+  </svg>`;
+}
+for (let i = 1; i <= 5; i++){
+  const b = document.createElement('button');
+  b.innerHTML = starSvg(false);
+  b.dataset.value = i;
+  b.addEventListener('click', () => setRating(i));
+  b.addEventListener('mouseenter', () => paintStars(i));
+  b.addEventListener('mouseleave', () => paintStars(state.rating));
+  starsEl.appendChild(b);
+}
+const captions = {1:"Ikke så bra", 2:"Grei", 3:"Bra", 4:"Veldig bra", 5:"Fantastisk!"};
+function paintStars(n){
+  [...starsEl.children].forEach((b, idx) => {
+    b.innerHTML = starSvg(idx < n);
+  });
+}
+function setRating(n){
+  state.rating = n;
+  paintStars(n);
+  document.getElementById('star-caption').textContent = captions[n] || "";
+  document.getElementById('btn-2').disabled = false;
+}
+
+// ---- build chips ----
+const chipsEl = document.getElementById('chips');
+ADJECTIVES.forEach(word => {
+  const c = document.createElement('button');
+  c.className = 'chip';
+  c.textContent = word;
+  c.addEventListener('click', () => toggleChip(c, word));
+  chipsEl.appendChild(c);
+});
+function toggleChip(el, word){
+  const selected = state.adjectives.includes(word);
+  if (selected){
+    state.adjectives = state.adjectives.filter(w => w !== word);
+  } else {
+    if (state.adjectives.length >= 3) return;
+    state.adjectives.push(word);
+  }
+  refreshChips();
+}
+function refreshChips(){
+  [...chipsEl.children].forEach(c => {
+    const w = c.textContent;
+    const isSel = state.adjectives.includes(w);
+    c.classList.toggle('selected', isSel);
+    c.classList.toggle('disabled', !isSel && state.adjectives.length >= 3);
+  });
+  document.getElementById('chip-count').textContent = `Du har valgt ${state.adjectives.length} av 3`;
+  document.getElementById('btn-3').disabled = state.adjectives.length !== 3;
+}
+
+// ---- title / text inputs ----
+document.getElementById('input-title').addEventListener('input', e => {
+  state.title = e.target.value;
+  document.getElementById('btn-1').disabled = state.title.trim().length === 0;
+});
+document.getElementById('input-text').addEventListener('input', e => {
+  state.text = e.target.value;
+  document.getElementById('btn-4').disabled = state.text.trim().length === 0;
+});
+
+// ---- step navigation ----
+const steps = ['step-start','step-1','step-2','step-3','step-4'];
+function goStep(n){
+  steps.forEach((id, idx) => {
+    document.getElementById(id).classList.toggle('active', idx === n);
+  });
+  currentStep = n;
+  const dots = document.querySelectorAll('#progress .dot');
+  dots.forEach((d, idx) => {
+    const stepNum = idx + 1;
+    d.classList.toggle('done', stepNum < n);
+    d.classList.toggle('active', stepNum === n);
+  });
+  document.getElementById('progress').style.visibility = n === 0 ? 'hidden' : 'visible';
+}
+goStep(0);
+
+// ---- submit + storage ----
+async function submitReview(){
+  const record = {
+    title: state.title.trim(),
+    rating: state.rating,
+    adjectives: state.adjectives,
+    text: state.text.trim()
+  };
+  renderSummary(record);
+  lastRecord = record;
+  document.getElementById('step-done').classList.add('active');
+  steps.forEach(id => document.getElementById(id).classList.remove('active'));
+  document.getElementById('progress').style.visibility = 'hidden';
+}
+
+function renderSummary(r){
+  const starsHtml = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+  document.getElementById('summary-card').innerHTML = `
+    <div class="summary-title">${escapeHtml(r.title)}</div>
+    <div class="summary-stars" style="color:var(--gold-deep); font-size:18px;">${starsHtml}</div>
+    <div class="summary-adj">${r.adjectives.map(a => `<span>${escapeHtml(a)}</span>`).join('')}</div>
+    <div class="summary-text">${escapeHtml(r.text)}</div>
+  `;
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function sendEmail(){
+  if (!lastRecord) return;
+  const r = lastRecord;
+  const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+  const subject = `Anmeldelse: ${r.title}`;
+  const body =
+`Tittel: ${r.title}
+Vurdering: ${stars} (${r.rating} av 5)
+Ord som passer: ${r.adjectives.join(', ')}
+
+Hva jeg synes om å lese utdraget:
+${r.text}`;
+  const mailto = `mailto:johaor0306@osloskolen.no?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.location.href = mailto;
+}
+
+function resetForm(){
+  state = { title: "", rating: 0, adjectives: [], text: "" };
+  document.getElementById('input-title').value = "";
+  document.getElementById('input-text').value = "";
+  document.getElementById('star-caption').textContent = "";
+  paintStars(0);
+  refreshChips();
+  document.getElementById('btn-1').disabled = true;
+  document.getElementById('btn-2').disabled = true;
+  document.getElementById('btn-4').disabled = true;
+  document.getElementById('step-done').classList.remove('active');
+  goStep(0);
+}
+
+</script>
 
 </body>
 </html>
